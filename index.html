@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>스트레스 자가진단 (KPSS-A)</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #f6f6f6;
+      color: #333;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .question {
+      margin: 20px 0;
+    }
+    .options label {
+      display: block;
+      margin: 5px 0;
+    }
+    button {
+      display: block;
+      margin: 30px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #result {
+      margin-top: 30px;
+      padding: 20px;
+      background: #e0f7fa;
+      border: 1px solid #00acc1;
+      display: none;
+    }
+    .description {
+      background: #fff;
+      padding: 15px;
+      border-left: 5px solid #00acc1;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>스트레스 자가진단 (KPSS-A)</h1>
+
+  <div class="description">
+    <p>
+      이 척도는 일상생활에서 주관적으로 느끼는 스트레스 정도를 평가하기 위한 척도입니다.<br>
+      각 문항을 잘 읽고 <strong>지난 1개월 동안</strong> 각 문항에 해당하는 내용을 얼마나 자주 느꼈는지 체크해 주십시오.<br>
+      문항은 총 10문항이며, 검사 결과는 자신을 이해하는 데 도움을 주는 정도로만 활용하는 것이 좋습니다.<br><br>
+      본 검사는 중고등학교 연령에 해당하는 청소년의 스트레스 정도를 알아보기 위한 검사입니다.<br>
+      초등 연령에 해당하는 학생 및 학부모님께서 심리검사를 원하실 경우, <strong>063-640-3572</strong>로 연락주시면 안내해드리겠습니다.
+    </p>
+  </div>
+
+  <form id="stress-form">
+    <div id="questions"></div>
+    <button type="submit">검사 완료</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const questions = [
+      "1. 예상치 못한 일이 생겨서 기분 나빠진 적이 얼마나 있었나요?",
+      "2. 중요한 일들을 잘 해낼 수 없다고 느낀 적은 얼마나 있었나요?",
+      "3. 초조하거나 스트레스가 쌓인다고 느낀 적은 얼마나 있었나요?",
+      "4. 개인적인 문제를 처리하는 능력에 대해 자신감을 느낀 적은 얼마나 있었나요?",  // 역문항
+      "5. 자신의 뜻대로 일이 진행된다고 느낀 적은 얼마나 있었나요?",  // 역문항
+      "6. 해야 할 모든 일들을 다 대처할 수 없다고 느낀 적은 얼마나 있었나요?",
+      "7. 모든 일들을 잘 다루고 있다고 느낀 적이 얼마나 있었나요?",  // 역문항
+      "8. 당신이 어찌 할 수 없는 일 때문에 화가 난 적이 얼마나 있었나요?",
+      "9. 시간 관리를 잘하고 있다고 생각했던 적이 얼마나 있었나요?",  // 역문항
+      "10. 어려운 일이 너무 많이 쌓여서 극복할 수 없다고 느낀 적이 얼마나 있었나요?"
+    ];
+
+    const reverseItems = [3, 4, 6, 8]; // 0-based index for 역문항 (4,5,7,9번 문항)
+
+    const options = [
+      "전혀 없었다", // 0점
+      "거의 없었다", // 1점
+      "가끔 있었다", // 2점
+      "꽤 자주 있었다", // 3점
+      "매우 자주 있었다" // 4점
+    ];
+
+    const questionsContainer = document.getElementById("questions");
+
+    questions.forEach((q, i) => {
+      const div = document.createElement("div");
+      div.classList.add("question");
+      div.innerHTML = `<strong>${q}</strong>`;
+      const opts = document.createElement("div");
+      opts.classList.add("options");
+      options.forEach((opt, idx) => {
+        opts.innerHTML += `
+          <label>
+            <input type="radio" name="q${i}" value="${idx}" required>
+            ${opt}
+          </label>
+        `;
+      });
+      div.appendChild(opts);
+      questionsContainer.appendChild(div);
+    });
+
+    document.getElementById("stress-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      let total = 0;
+      for (let i = 0; i < questions.length; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selected) {
+          alert("모든 문항에 응답해 주세요.");
+          return;
+        }
+        let score = parseInt(selected.value);
+        if (reverseItems.includes(i)) {
+          score = 4 - score; // 역문항 처리
+        }
+        total += score;
+      }
+
+      const resultDiv = document.getElementById("result");
+      let interpretation = "";
+
+      if (total <= 13) {
+        interpretation = "당신이 느끼고 있는 스트레스 정도는 정상적인 수준으로, 심리적으로 안정되어 있습니다.";
+      } else if (total <= 16) {
+        interpretation = "검사 결과, 약간의 스트레스를 받고 계신 것으로 보입니다. 스트레스를 해소하기 위해 운동이나 가벼운 산책, 명상 등 자신만의 스트레스 해소법을 찾아보는 것이 좋겠습니다.";
+      } else if (total <= 18) {
+        interpretation = "검사 결과, 중간 정도의 스트레스를 받고 있는 것으로 보입니다. 스트레스를 해소하기 위해 적극적인 노력을 하실 필요가 있으며, 원하신다면 전문가에게 도움을 요청해 보십시오.";
+      } else {
+        interpretation = "검사 결과, 심한 스트레스를 받고 있는 것으로 나타나고 있어, 일상생활에서 어려움을 겪고 있을 가능성이 높아 보입니다. 상담센터에 방문하시어 추가적인 검사를 받아보시거나, 전문가와 자신의 상태에 대해 이야기해 볼 것을 권합니다.";
+      }
+
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = `<h2>검사 결과</h2><p><strong>총점: ${total}점</strong></p><p>${interpretation}</p>`;
+      window.scrollTo({ top: resultDiv.offsetTop, behavior: "smooth" });
+    });
+  </script>
+
+</body>
+</html>
